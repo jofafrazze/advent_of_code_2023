@@ -1,0 +1,48 @@
+﻿using AdventOfCode;
+using System.Reflection;
+
+namespace aoc
+{
+    public class Day04
+    {
+        // Today: 
+        public static Object PartA(string file)
+        {
+            var input = ReadInput.StringLists(Day, file);
+            int sum = 0;
+            foreach (var sl in input)
+            {
+                var s = string.Join(" ", sl.Skip(2));
+                var round = s.Split("|", StringSplitOptions.RemoveEmptyEntries);
+                var winning = round[0].Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse);
+                var your = round[1].Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse);
+                int n = your.Where(x => winning.Contains(x)).Count();
+                sum += (int)Math.Pow(2, n - 1);
+            }
+            return sum;
+        }
+        public static Object PartB(string file)
+        {
+            var input = ReadInput.StringLists(Day, file);
+            long sum = 0;
+            var nCards = new Dictionary<int, long>();
+            int curCard = 1;
+            foreach (var sl in input)
+            {
+                var s = string.Join(" ", sl.Skip(2));
+                var round = s.Split("|", StringSplitOptions.RemoveEmptyEntries);
+                var winning = round[0].Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse);
+                var your = round[1].Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse);
+                nCards.Inc(curCard, 1);
+                int n = your.Where(x => winning.Contains(x)).Count();
+                for (int i = 0; i < n; i++)
+                    nCards.Inc(curCard + 1 + i, nCards[curCard]);
+                sum += nCards[curCard];
+                curCard++;
+            }
+            return sum;
+        }
+        static void Main() => Aoc.Execute(Day, PartA, PartB);
+        static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
+    }
+}
