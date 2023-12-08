@@ -25,7 +25,7 @@ namespace aoc
                 }
                 a *= nLarger;
             }
-            return a;
+            return (int)a;
         }
         public static Object PartB(string file)
         {
@@ -45,7 +45,11 @@ namespace aoc
             }
             return nLarger;
         }
-        static void Main() => Aoc.Execute(Day, PartA, PartB);
+        public static (Object a, Object b) DoPuzzle(string file)
+        {
+            return (PartA(file), PartB(file));
+        }
+        static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }

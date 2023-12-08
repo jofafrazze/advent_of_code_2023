@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace aoc
 {
-    public class Day09
+    public class Day18
     {
         // Today: 
         public static Object PartA(string file)

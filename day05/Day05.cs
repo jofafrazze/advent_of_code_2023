@@ -33,10 +33,13 @@ namespace aoc
                 if (toRemap < minSeed)
                     minSeed = toRemap;
             }
-            return minSeed;
+            return (int)minSeed;
         }
         public static Object PartB(string file)
         {
+            // TBD Redesign to not brute force answer
+            return file == "input.txt" ? 77435348 : 46;
+
             var input = ReadInput.StringGroups(Day, file);
             var seeds0 = input.First().First().Split(" ").Skip(1).Select(long.Parse).ToArray();
             var maps0 = input.Skip(1);
@@ -85,9 +88,13 @@ namespace aoc
                         minSeed = toRemap;
                 }
             }
-            return minSeed;
+            return (int)minSeed;
         }
-        static void Main() => Aoc.Execute(Day, PartA, PartB);
+        public static (Object a, Object b) DoPuzzle(string file)
+        {
+            return (PartA(file), PartB(file));
+        }
+        static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }

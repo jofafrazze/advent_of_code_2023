@@ -107,7 +107,11 @@ namespace aoc
             }
             return sum;
         }
-        static void Main() => Aoc.Execute(Day, PartA, PartB);
+        public static (Object a, Object b) DoPuzzle(string file)
+        {
+            return (PartA(file), PartB(file));
+        }
+        static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }

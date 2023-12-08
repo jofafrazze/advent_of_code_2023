@@ -28,7 +28,7 @@ namespace aoc
                 bool goLeft = leftRight[leftRightPos++ % leftRight.Length] == 'L';
                 pos = map[pos][goLeft ? 0 : 1];
                 if (pos == "ZZZ")
-                    return steps;
+                    return (long)steps;
             }
         }
         public static Object PartB(string file)
@@ -71,7 +71,11 @@ namespace aoc
                 big = big * i / Utils.GCF(big, i);
             return big;
         }
-        static void Main() => Aoc.Execute(Day, PartA, PartB);
+        public static (Object a, Object b) DoPuzzle(string file)
+        {
+            return (PartA(file), PartB(file));
+        }
+        static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }
