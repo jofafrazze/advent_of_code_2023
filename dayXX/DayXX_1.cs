@@ -11,7 +11,7 @@ namespace aoc
             var input = ReadInput.Strings(Day, file);
             return (0, 0);
         }
-        static void Main() => Aoc.Execute(Day, DoPuzzle);
+        //static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }
