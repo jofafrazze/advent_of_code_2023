@@ -5,7 +5,7 @@ namespace aoc
 {
     public class Day01
     {
-        // Today: 
+        // Trebuchet?!: Find leading and trailing number, as number or text
         public static (Object a, Object b) DoPuzzle(string file)
         {
             var input = ReadInput.Strings(Day, file);

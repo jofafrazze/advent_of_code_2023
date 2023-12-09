@@ -5,64 +5,32 @@ namespace aoc
 {
     public class Day02
     {
-        // Today: 
-        public static Object PartA(string file)
-        {
-            var input = ReadInput.StringLists(Day, file);
-            int sum = 0;
-            var availableCubes = new Dictionary<string, int>() { ["red"] = 12, ["green"] = 13, ["blue"] = 14 };
-            foreach (var sl in input)
-            {
-                int id = int.Parse(sl[1][..^1]);
-                var s = string.Join(" ", sl.Skip(2));
-                var rounds = s.Split("; ", StringSplitOptions.RemoveEmptyEntries);
-                var maxCubes = new Dictionary<string, int>() { ["red"] = 0, ["green"] = 0, ["blue"] = 0 };
-                foreach (var round in rounds)
-                {
-                    var cubes = round.Split(", ", StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var cube in cubes)
-                    {
-                        var nCubes = cube.Split(" ");
-                        int n = int.Parse(nCubes[0]);
-                        string color = nCubes[1];
-                        if (maxCubes[color] < n)
-                            maxCubes[color] = n;
-                    }
-                }
-                if (maxCubes["red"] <= availableCubes["red"] && maxCubes["green"] <= availableCubes["green"] && maxCubes["blue"] <= availableCubes["blue"])
-                    sum += id;
-            }
-            return sum;
-        }
-        public static Object PartB(string file)
-        {
-            var input = ReadInput.StringLists(Day, file);
-            int sum = 0;
-            foreach (var sl in input)
-            {
-                int id = int.Parse(sl[1][..^1]);
-                var s = string.Join(" ", sl.Skip(2));
-                var rounds = s.Split("; ", StringSplitOptions.RemoveEmptyEntries);
-                var maxCubes = new Dictionary<string, int>() { ["red"] = 0, ["green"] = 0, ["blue"] = 0 };
-                foreach (var round in rounds)
-                {
-                    var cubes = round.Split(", ", StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var cube in cubes)
-                    {
-                        var nCubes = cube.Split(" ");
-                        int n = int.Parse(nCubes[0]);
-                        string color = nCubes[1];
-                        if (maxCubes[color] < n)
-                            maxCubes[color] = n;
-                    }
-                }
-                sum += maxCubes["red"] * maxCubes["green"] * maxCubes["blue"];
-            }
-            return sum;
-        }
+        // Cube Conundrum: Parse number of cubes of each color
         public static (Object a, Object b) DoPuzzle(string file)
         {
-            return (PartA(file), PartB(file));
+            var input = ReadInput.StringLists(Day, file);
+            int ares = 0, bres = 0;
+            const string R = "red", G = "green", B = "blue";
+            var haveCubes = new Dictionary<string, int>() { [R] = 12, [G] = 13, [B] = 14 };
+            foreach (var sl in input)
+            {
+                int id = int.Parse(sl[1][..^1]);
+                var rounds = string.Join(" ", sl.Skip(2)).Split("; ", StringSplitOptions.RemoveEmptyEntries);
+                var maxCubes = new Dictionary<string, int>() { [R] = 0, [G] = 0, [B] = 0 };
+                foreach (var round in rounds)
+                    foreach (var cube in round.Split(", ", StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        var nCubes = cube.Split(" ");
+                        int n = int.Parse(nCubes[0]);
+                        string color = nCubes[1];
+                        if (maxCubes[color] < n)
+                            maxCubes[color] = n;
+                    }
+                if (maxCubes[R] <= haveCubes[R] && maxCubes[G] <= haveCubes[G] && maxCubes[B] <= haveCubes[B])
+                    ares += id;
+                bres += maxCubes[R] * maxCubes[G] * maxCubes[B];
+            }
+            return (ares, bres);
         }
         static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);

@@ -6,7 +6,7 @@ namespace aoc
 {
     public class Day03
     {
-        // Today: 
+        // Gear Ratios: Find numbers with adjacent symbols in 2D character map
         public static (Object a, Object b) DoPuzzle(string file)
         {
             var m = Map.Build(ReadInput.Strings(Day, file));
