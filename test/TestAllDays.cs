@@ -76,16 +76,16 @@ namespace test
     public class TestDay10
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day10.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((80, 10), aoc.Day10.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day10.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((6786, 495), aoc.Day10.DoPuzzle(Input.actual));
     }
     public class TestDay11
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day11.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((374L, 82000210L), aoc.Day11.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day11.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((10033566L, 560822911938L), aoc.Day11.DoPuzzle(Input.actual));
     }
     public class TestDay12
     {
