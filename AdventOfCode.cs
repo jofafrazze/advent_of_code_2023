@@ -423,6 +423,16 @@ namespace AdventOfCode
                     positions.Add(new GenericPosition2D<int>(x, y));
             return positions;
         }
+        public List<GenericPosition2D<long>> PositionsLong(GenericPosition2D<int> p0 = new(), int w0 = 0, int h0 = 0)
+        {
+            int w = (w0 < 1) ? width - p0.x : w0;
+            int h = (h0 < 1) ? height - p0.y : h0;
+            var positions = new List<GenericPosition2D<long>>(w * h);
+            for (int y = p0.y; y < p0.y + h; y++)
+                for (int x = p0.x; x < p0.x + w; x++)
+                    positions.Add(new GenericPosition2D<long>(x, y));
+            return positions;
+        }
 
         public void Switch(GenericPosition2D<int> p1, GenericPosition2D<int> p2)
         {
