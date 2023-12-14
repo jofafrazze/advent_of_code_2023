@@ -454,6 +454,14 @@ namespace AdventOfCode
             pos = m.pos;
             data = m.data;
         }
+        public static Map Transpose(Map mIn)
+        {
+            Map m = new(mIn.height, mIn.width, ' ');
+            for (int y = 0; y < m.height; y++)
+                for (int x = 0; x < m.width; x++)
+                    m.data[x, y] = mIn.data[y, x];
+            return m;
+        }
         public static Map TurnCW(Map mIn)
         {
             Map m = new(mIn);
