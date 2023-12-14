@@ -5,51 +5,64 @@ namespace aoc
 {
     public class Day14
     {
-        // Today: 
-        static Map Permute(Map mIn)
+        // Parabolic Reflector Dish: Move chars around in 2D, find repeating cycle
+        static bool PermuteNorth(Map m)
         {
-            Map m = new(mIn);
+            bool changed = false;
             for (int y = 0; y < m.height - 1; y++)
-            {
                 for (int x = 0; x < m.width; x++)
-                {
-                    if (m.data[x,y] == '.' && m.data[x, y + 1] == 'O')
+                    if (m.data[x, y] == '.' && m.data[x, y + 1] == 'O')
                     {
                         m.data[x, y] = 'O';
                         m.data[x, y + 1] = '.';
+                        changed = true;
                     }
-                }
-            }
-            return m;
+            return changed;
         }
-        static Map FlipNorth(Map mIn)
+        static Map TiltNorth(Map m) { while (PermuteNorth(m)) ; return m; }
+        static bool PermuteSouth(Map m)
         {
-            Map cur = new Map(mIn);
-            Map prev;
-            do
-            {
-                prev = cur;
-                cur = Permute(prev);
-            }
-            while (cur != prev);
-            return cur;
-        }
-        static int Score(Map m)
-        {
-            int sum = 0;
-            for (int y = 0; y < m.height; y++)
+            bool changed = false;
+            for (int y = m.height - 2; y >= 0; y--)
                 for (int x = 0; x < m.width; x++)
-                    if (m.data[x, y] == 'O')
-                        sum += m.height - y;
-            return sum;
+                    if (m.data[x, y] == 'O' && m.data[x, y + 1] == '.')
+                    {
+                        m.data[x, y] = '.';
+                        m.data[x, y + 1] = 'O';
+                        changed = true;
+                    }
+            return changed;
         }
-        public static Object PartA(string file)
+        static Map TiltSouth(Map m) { while (PermuteSouth(m)) ; return m; }
+        static bool PermuteWest(Map m)
         {
-            var input = ReadInput.Strings(Day, file);
-            Map mIn = Map.Build(input);
-            Map m = FlipNorth(mIn);
-            return Score(m);
+            bool changed = false;
+            for (int y = 0; y < m.height; y++)
+                for (int x = 0; x < m.width - 1; x++)
+                    if (m.data[x, y] == '.' && m.data[x + 1, y] == 'O')
+                    {
+                        m.data[x, y] = 'O';
+                        m.data[x + 1, y] = '.';
+                        changed = true;
+                    }
+            return changed;
         }
+        static Map TiltWest(Map m) { while (PermuteWest(m)) ; return m; }
+        static bool PermuteEast(Map m)
+        {
+            bool changed = false;
+            for (int y = 0; y < m.height; y++)
+                for (int x = m.width - 2; x >= 0; x--)
+                    if (m.data[x + 1, y] == '.' && m.data[x, y] == 'O')
+                    {
+                        m.data[x, y] = '.';
+                        m.data[x + 1, y] = 'O';
+                        changed = true;
+                    }
+            return changed;
+        }
+        static Map TiltEast(Map m) { while (PermuteEast(m)) ; return m; }
+        static int Score(Map m) => m.Positions().Where(p => m[p] == 'O').Select(p => m.height - p.y).Sum();
         static Map TurnCW(Map mIn)
         {
             Map m = new(mIn);
@@ -70,7 +83,7 @@ namespace aoc
         {
             Map m = new(mIn);
             m = TurnCCW(m);
-            m = FlipNorth(m);
+            TiltNorth(m);
             m = TurnCW(m);
             return m;
         }
@@ -79,7 +92,7 @@ namespace aoc
             Map m = new(mIn);
             m = TurnCCW(m);
             m = TurnCCW(m);
-            m = FlipNorth(m);
+            TiltNorth(m);
             m = TurnCW(m);
             m = TurnCW(m);
             return m;
@@ -88,14 +101,17 @@ namespace aoc
         {
             Map m = new(mIn);
             m = TurnCW(m);
-            m = FlipNorth(m);
+            TiltNorth(m);
             m = TurnCCW(m);
             return m;
         }
-        public static Object PartB(string file)
+        public static (Object a, Object b) DoPuzzle(string file)
         {
             var input = ReadInput.Strings(Day, file);
             Map mIn = Map.Build(input);
+            Map ma = new(mIn);
+            TiltNorth(ma);
+            int a = Score(ma);
             Map cur = new(mIn);
             Map prev;
             int i = 0;
@@ -104,10 +120,10 @@ namespace aoc
             {
                 i++;
                 prev = cur;
-                cur = FlipNorth(cur);
-                cur = FlipWest(cur);
-                cur = FlipSouth(cur);
-                cur = FlipEast(cur);
+                TiltNorth(cur);
+                TiltWest(cur);
+                TiltSouth(cur);
+                TiltEast(cur);
                 Map c = new(cur);
                 if (!been.ContainsKey(c))
                     been[c] = i;
@@ -116,14 +132,11 @@ namespace aoc
                     int offs = been[c];
                     int cycleLen = i - offs;
                     int idx = offs + (1000_000_000 - offs) % cycleLen;
-                    return Score(been.Where(w => w.Value == idx).Select(w => w.Key).First());
+                    int b = Score(been.Where(w => w.Value == idx).Select(w => w.Key).First());
+                    return (a, b);
                 }
             }
             while (true);
-        }
-        public static (Object a, Object b) DoPuzzle(string file)
-        {
-            return (PartA(file), PartB(file));
         }
         static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
