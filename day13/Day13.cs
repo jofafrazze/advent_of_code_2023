@@ -6,7 +6,7 @@ namespace aoc
 {
     public class Day13
     {
-        // Today: 
+        // Point of Incidence: Find reflection in 2D map of chars
         static int ReflectionAboveRow(Map m, int previousRow = 0)
         {
             for (int y = 0; y < m.height - 1; y++)
@@ -28,7 +28,6 @@ namespace aoc
         static int ReflectionAboveRowPermute(Map m, int previousRow)
         {
             for (int y = 0; y < m.height; y++)
-            {
                 for (int x = 0; x < m.width; x++)
                 {
                     Map m2 = new(m);
@@ -37,50 +36,24 @@ namespace aoc
                     if (row > 0)
                         return row;
                 }
-            }
             return 0;
         }
         public static (Object a, Object b) DoPuzzle(string file)
         {
             var input = ReadInput.StringGroups(Day, file);
-            List<int> verticalSymmetry = new();
-            List<int> horizontalSymmetry = new();
-            int asum = 0;
+            int asum = 0, bsum = 0;
             foreach (var sl in input)
             {
                 Map m = Map.Build(sl);
-                int a = ReflectionAboveRow(m);
-                asum += a * 100;
-                verticalSymmetry.Add(a);
-            }
-            foreach (var sl in input)
-            {
-                Map m = Map.Build(sl);
-                Map trans = Map.Transpose(m);
-                int a = ReflectionAboveRow(trans);
-                asum += a;
-                horizontalSymmetry.Add(a);
-            }
-
-
-            int bsum = 0;
-            for (int i = 0; i < input.Count; i++)
-            {
-                Map m = Map.Build(input[i]);
-                int line = ReflectionAboveRowPermute(m, verticalSymmetry[i]);
-                bsum += line * 100;
-            }
-            for (int i = 0; i < input.Count; i++)
-            {
-                Map m = Map.Build(input[i]);
-                Map trans = Map.Transpose(m);
-                trans.Print();
-                int line = ReflectionAboveRowPermute(trans, horizontalSymmetry[i]);
-                bsum += line;
+                Map mt = Map.Transpose(m);
+                int r = ReflectionAboveRow(m);
+                int c = ReflectionAboveRow(mt);
+                asum += r * 100 + c;
+                bsum += ReflectionAboveRowPermute(m, r) * 100 + ReflectionAboveRowPermute(mt, c);
             }
             return (asum, bsum);
         }
-        static void Main() => Aoc.Execute(Day, DoPuzzle, true);
+        static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }
