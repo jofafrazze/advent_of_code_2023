@@ -470,9 +470,11 @@ namespace AdventOfCode
             return s;
         }
 
-        public void Print()
+        public void Print(bool addLine = true)
         {
             Console.WriteLine(PrintToString());
+            if (addLine)
+                Console.WriteLine();
         }
 
         public override bool Equals(object? obj)
@@ -494,7 +496,10 @@ namespace AdventOfCode
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(width, height, data);
+            char c0 = data[0, 0];
+            char c1 = data[width - 1, height - 1];
+            char c2 = data[(width - 1) / 2, (height - 1) / 2];
+            return HashCode.Combine(width, height, c0, c1, c2);
         }
 
         public static bool operator ==(Map map1, Map map2)
