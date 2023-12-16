@@ -111,16 +111,16 @@ namespace test
     public class TestDay15
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day15.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((1320, 145), aoc.Day15.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day15.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((510801, 212763), aoc.Day15.DoPuzzle(Input.actual));
     }
     public class TestDay16
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day16.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((46, 51), aoc.Day16.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day16.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((8901, 9064), aoc.Day16.DoPuzzle(Input.actual));
     }
     public class TestDay17
     {
