@@ -8,49 +8,28 @@ namespace aoc
     {
         // Today: 
         record struct Step(Pos p, Pos dir, int nStraight);
-        static readonly Dictionary<Pos, Pos> backwards = new()
-        {
-            [CoordsRC.right] = CoordsRC.left,
-            [CoordsRC.left] = CoordsRC.right,
-            [CoordsRC.up] = CoordsRC.down,
-            [CoordsRC.down] = CoordsRC.up,
-        };
         static int WalkMap(Map m, List<Step> start)
         {
-            Dictionary<Step, int> visited = new();
+            HashSet<Step> visited = new();
             var toVisit = new PriorityQueue<Step, int>();
             foreach (var s in start)
-            {
-                visited[s] = 0;
                 toVisit.Enqueue(s, 0);
-            }
-            int bestSum = int.MaxValue;
-            Pos bottomRight = new Pos(m.width - 1, m.height - 1);
-            while (toVisit.TryDequeue(out Step cur, out int score))
+            Pos endPos = new(m.width - 1, m.height - 1);
+            while (toVisit.TryDequeue(out Step cur, out int curScore))
             {
+                if (cur.p == endPos)
+                    return curScore;
+                if (visited.Contains(cur))
+                    continue;
+                visited.Add(cur);
                 foreach (Pos dir in CoordsRC.directions4)
                 {
-                    if (dir != backwards[cur.dir])
-                    {
-                        Step next = new(cur.p + cur.dir, dir, (dir == cur.dir) ? cur.nStraight + 1 : 0);
-                        if (m.HasPosition(next.p) && next.nStraight < 3)
-                        {
-                            int nextSum = visited[cur] + (m[next.p] - '0');
-                            if (nextSum < bestSum)
-                            {
-                                if (!visited.ContainsKey(next) || visited[next] > nextSum)
-                                {
-                                    visited[next] = nextSum;
-                                    toVisit.Enqueue(next, nextSum);
-                                    if (next.p == bottomRight)
-                                        bestSum = nextSum;
-                                }
-                            }
-                        }
-                    }
+                    Step next = new(cur.p + cur.dir, dir, (dir == cur.dir) ? cur.nStraight + 1 : 0);
+                    if (dir != -cur.dir && m.HasPosition(next.p) && next.nStraight < 3)
+                        toVisit.Enqueue(next, curScore + m[next.p] - '0');
                 }
             }
-            return bestSum;
+            throw new Exception("Not found!");
         }
         static int WalkMap2(Map m, List<Step> start)
         {
@@ -67,7 +46,7 @@ namespace aoc
             {
                 foreach (Pos dir in CoordsRC.directions4)
                 {
-                    if (dir != backwards[cur.dir])
+                    if (dir != -cur.dir)
                     {
                         Step next = new(cur.p + cur.dir, dir, (dir == cur.dir) ? cur.nStraight + 1 : 0);
                         if ((dir == cur.dir) || cur.nStraight >= 3)

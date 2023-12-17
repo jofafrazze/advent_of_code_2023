@@ -64,6 +64,13 @@ namespace AdventOfCode
             p.y = Extensions.Add(p.y, p2.y);
             return p;
         }
+        public static GenericPosition2D<T> operator -(GenericPosition2D<T> p1)
+        {
+            GenericPosition2D<T> p = new();
+            p.x = Extensions.Negate(p1.x);
+            p.y = Extensions.Negate(p1.y);
+            return p;
+        }
         public static GenericPosition2D<T> operator -(GenericPosition2D<T> p1, T k)
         {
             GenericPosition2D<T> p = new(p1);
@@ -197,6 +204,14 @@ namespace AdventOfCode
             p.x = Extensions.Add(p.x, p2.x);
             p.y = Extensions.Add(p.y, p2.y);
             p.z = Extensions.Add(p.z, p2.z);
+            return p;
+        }
+        public static GenericPosition3D<T> operator -(GenericPosition3D<T> p1)
+        {
+            GenericPosition3D<T> p = new();
+            p.x = Extensions.Negate(p1.x);
+            p.y = Extensions.Negate(p1.y);
+            p.z = Extensions.Negate(p1.z);
             return p;
         }
         public static GenericPosition3D<T> operator -(GenericPosition3D<T> p1, T k)
@@ -784,6 +799,11 @@ namespace AdventOfCode
             dynamic a = number1;
             dynamic b = number2;
             return a - b;
+        }
+        public static T Negate<T>(T number) where T : notnull
+        {
+            dynamic a = number;
+            return -a;
         }
         public static T Multiply<T>(T number1, T number2) where T : notnull
         {
