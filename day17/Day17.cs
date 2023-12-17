@@ -1,24 +1,105 @@
 ﻿using AdventOfCode;
 using System.Reflection;
+using Pos = AdventOfCode.GenericPosition2D<int>;
 
 namespace aoc
 {
     public class Day17
     {
         // Today: 
-        public static Object PartA(string file)
+        record struct Step(Pos p, Pos dir, int nStraight);
+        static readonly Dictionary<Pos, Pos> backwards = new()
         {
-            var input = ReadInput.Ints(Day, file);
-            return 0;
+            [CoordsRC.right] = CoordsRC.left,
+            [CoordsRC.left] = CoordsRC.right,
+            [CoordsRC.up] = CoordsRC.down,
+            [CoordsRC.down] = CoordsRC.up,
+        };
+        static int WalkMap(Map m, List<Step> start)
+        {
+            Dictionary<Step, int> visited = new();
+            var toVisit = new PriorityQueue<Step, int>();
+            foreach (var s in start)
+            {
+                visited[s] = 0;
+                toVisit.Enqueue(s, 0);
+            }
+            int bestSum = int.MaxValue;
+            Pos bottomRight = new Pos(m.width - 1, m.height - 1);
+            while (toVisit.TryDequeue(out Step cur, out int score))
+            {
+                foreach (Pos dir in CoordsRC.directions4)
+                {
+                    if (dir != backwards[cur.dir])
+                    {
+                        Step next = new(cur.p + cur.dir, dir, (dir == cur.dir) ? cur.nStraight + 1 : 0);
+                        if (m.HasPosition(next.p) && next.nStraight < 3)
+                        {
+                            int nextSum = visited[cur] + (m[next.p] - '0');
+                            if (nextSum < bestSum)
+                            {
+                                if (!visited.ContainsKey(next) || visited[next] > nextSum)
+                                {
+                                    visited[next] = nextSum;
+                                    toVisit.Enqueue(next, nextSum);
+                                    if (next.p == bottomRight)
+                                        bestSum = nextSum;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return bestSum;
         }
-        public static Object PartB(string file)
+        static int WalkMap2(Map m, List<Step> start)
         {
-            var v = ReadInput.Strings(Day, file);
-            return 0;
+            Dictionary<Step, int> visited = new();
+            var toVisit = new PriorityQueue<Step, int>();
+            foreach (var s in start)
+            {
+                visited[s] = 0;
+                toVisit.Enqueue(s, 0);
+            }
+            int bestSum = int.MaxValue;
+            Pos bottomRight = new Pos(m.width - 1, m.height - 1);
+            while (toVisit.TryDequeue(out Step cur, out int score))
+            {
+                foreach (Pos dir in CoordsRC.directions4)
+                {
+                    if (dir != backwards[cur.dir])
+                    {
+                        Step next = new(cur.p + cur.dir, dir, (dir == cur.dir) ? cur.nStraight + 1 : 0);
+                        if ((dir == cur.dir) || cur.nStraight >= 3)
+                        {
+                            if (m.HasPosition(next.p) && next.nStraight < 10)
+                            {
+                                int nextSum = visited[cur] + (m[next.p] - '0');
+                                if (nextSum < bestSum)
+                                {
+                                    if (!visited.ContainsKey(next) || visited[next] > nextSum)
+                                    {
+                                        visited[next] = nextSum;
+                                        toVisit.Enqueue(next, nextSum);
+                                        if (next.p == bottomRight && next.nStraight >= 4)
+                                            bestSum = nextSum;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return bestSum;
         }
         public static (Object a, Object b) DoPuzzle(string file)
         {
-            return (PartA(file), PartB(file));
+            var input = ReadInput.Strings(Day, file);
+            Map m = Map.Build(input);
+            List<Step> steps = new() { new Step(new Pos(), CoordsRC.right, 0), new Step(new Pos(), CoordsRC.down, 0) };
+            int a = WalkMap(m, steps);
+            int b = WalkMap2(m, steps);
+            return (a, b);
         }
         static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
