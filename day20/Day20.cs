@@ -12,62 +12,37 @@ namespace aoc
         {
             var input = ReadInput.Strings(Day, file);
             Dictionary<string, Node> nodes = new();
+            List<(string name, List<string> connections)> modules = new();
             string toStrip = "%&->,";
-            foreach (var s0 in input)
+            foreach (var line in input)
             {
-                bool isFlipFlop = s0[0] == '%';
-                string s = new string(s0.ToCharArray().Where(c => !toStrip.Contains(c)).ToArray());
-                var sl = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                string name = sl[0];
-                Node node = nodes.ContainsKey(name) ? nodes[name] : 
-                    new Node(new Graph.Module(name, isFlipFlop, false, new Dictionary<string, bool>()));
-                nodes[name] = node;
+                bool isFlipFlop = line[0] == '%';
+                var sl = string.Concat(line.ToCharArray().Where(c => !toStrip.Contains(c))).Split(' ').ToList();
+                modules.Add((sl[0], sl.Skip(2).ToList()));
+                nodes[sl[0]] = new Node(new Graph.Module(sl[0], isFlipFlop, false, new Dictionary<string, bool>()));
             }
-            foreach (var s0 in input)
-            {
-                string s = new string(s0.ToCharArray().Where(c => !toStrip.Contains(c)).ToArray());
-                var sl = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                foreach (var to in sl.Skip(1))
-                {
-                    if (!nodes.ContainsKey(to))
-                    {
-                        nodes[to] = new Node(new Graph.Module(to, true, false, new Dictionary<string, bool>()));
-                    }
-                }
-            }
-            foreach (var s0 in input)
-            {
-                string s = new string(s0.ToCharArray().Where(c => !toStrip.Contains(c)).ToArray());
-                var sl = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                string name = sl[0];
-                foreach (var to in sl.Skip(1))
+            foreach (var to in modules.Select(w => w.connections).SelectMany(w => w))
+                if (!nodes.ContainsKey(to))
+                    nodes[to] = new Node(new Graph.Module(to, true, false, new Dictionary<string, bool>()));
+            foreach (var (name, connections) in modules)
+                foreach (var to in connections)
                 {
                     nodes[to].t.inputsFrom[name] = false;
                     nodes[name].edges.Add(nodes[to]);
                 }
-            }
             Queue<Pulse> pulses = new();
             long nLow = 0, nHigh = 0, a = 0;
             bool findRx = nodes.ContainsKey("rx");
-            string beforeRx = "";
-            Dictionary<string, long> cyclesToLow = new();
-            if (findRx)
-            {
-                beforeRx = nodes["rx"].t.inputsFrom.Keys.First();
-                cyclesToLow = nodes[beforeRx].t.inputsFrom.Keys.ToDictionary(w => w, w => 0L);
-            }
-            for (int i = 0; i < 1000 || (findRx && cyclesToLow.Values.Where(w => w == 0).Any()); i++)
+            string beforeRx = findRx ? nodes["rx"].t.inputsFrom.Keys.First() : "";
+            Dictionary<string, long> cyclesToLow = findRx ? 
+                nodes[beforeRx].t.inputsFrom.Keys.ToDictionary(w => w, w => 0L) : new();
+            for (int presses = 1; a == 0 || (findRx && cyclesToLow.Values.Where(w => w == 0).Any()); presses++)
             {
                 pulses.Enqueue(new Pulse("button", "broadcaster", false));
                 while (pulses.TryDequeue(out Pulse p))
                 {
                     if (p.dest == beforeRx && p.isHigh && cyclesToLow[p.from] == 0)
-                    {
-                        Console.WriteLine($"{p.from} send low after {i + 1} button presses");
-                        cyclesToLow[p.from] = i + 1;
-                    }
-                    //string lh = p.isHigh ? "high" : "low";
-                    //Console.WriteLine($"{p.from} -{lh}-> {p.dest}");
+                        cyclesToLow[p.from] = presses;
                     if (p.isHigh)
                         nHigh++;
                     else
@@ -77,16 +52,13 @@ namespace aoc
                         foreach (var n in nodes[p.dest].edges)
                             pulses.Enqueue(new Pulse(p.dest, n.t.name, p.isHigh));
                     }
-                    else if (nodes[p.dest].t.isFlipFlop)
+                    else if (nodes[p.dest].t.isFlipFlop && !p.isHigh)
                     {
-                        if (!p.isHigh)
-                        {
-                            nodes[p.dest].t.state = !nodes[p.dest].t.state;
-                            foreach (var n in nodes[p.dest].edges)
-                                pulses.Enqueue(new Pulse(p.dest, n.t.name, nodes[p.dest].t.state));
-                        }
+                        nodes[p.dest].t.state = !nodes[p.dest].t.state;
+                        foreach (var n in nodes[p.dest].edges)
+                            pulses.Enqueue(new Pulse(p.dest, n.t.name, nodes[p.dest].t.state));
                     }
-                    else // Conjunction module, can have several inputs
+                    else if (!nodes[p.dest].t.isFlipFlop) // Conjunction module
                     {
                         nodes[p.dest].t.inputsFrom[p.from] = p.isHigh;
                         bool allHigh = nodes[p.dest].t.inputsFrom.Values.All(w => w);
@@ -94,7 +66,7 @@ namespace aoc
                             pulses.Enqueue(new Pulse(p.dest, n.t.name, !allHigh));
                     }
                 }
-                if (i == 999)
+                if (presses == 1000)
                     a = nLow * nHigh;
             }
             long b = cyclesToLow.Values.Aggregate(1L, (u, v) => Utils.LCM(u, v));
