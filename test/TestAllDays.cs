@@ -132,23 +132,23 @@ namespace test
     public class TestDay18
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day18.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((62, 952408144115L), aoc.Day18.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day18.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((47527, -1), aoc.Day18.DoPuzzle(Input.actual));
     }
     public class TestDay19
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day19.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((19114, 167409079868000L), aoc.Day19.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day19.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((492702, 138616621185978L), aoc.Day19.DoPuzzle(Input.actual));
     }
     public class TestDay20
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day20.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((11687500L, 1L), aoc.Day20.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day20.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((814934624L, 228282646835717L), aoc.Day20.DoPuzzle(Input.actual));
     }
     public class TestDay21
     {

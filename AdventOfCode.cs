@@ -940,6 +940,7 @@ namespace AdventOfCode
 
     public static class Graph
     {
+        public record struct Module(string name, bool isFlipFlop, bool state, Dictionary<string, bool> inputsFrom);
         public class Node<T>
         {
             public T t;
