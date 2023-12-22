@@ -835,6 +835,10 @@ namespace AdventOfCode
             return enable ? elements.Select(p => p.SwitchXY()) : elements;
         }
 
+        public static (T min, T max) MinMax<T>(this IEnumerable<T> elements) where T : notnull
+        {
+            return (elements.Min()!, elements.Max()!);
+        }
         public static void Inc<T, U>(this Dictionary<T, U> dictionary, T key, U value) where T : notnull where U : notnull
         {
             dictionary[key] = Add(dictionary.GetValueOrDefault(key, default!), value!)!;

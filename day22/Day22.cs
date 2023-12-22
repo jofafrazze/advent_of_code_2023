@@ -1,147 +1,69 @@
 ﻿using AdventOfCode;
 using System.Reflection;
-using Pos2 = AdventOfCode.GenericPosition2D<int>;
-using Pos = AdventOfCode.GenericPosition3D<int>;
+using Pos = AdventOfCode.GenericPosition2D<int>;
+using Pos3 = AdventOfCode.GenericPosition3D<int>;
 
 namespace aoc
 {
     public class Day22
     {
         // Today: 
-        static Dictionary<Pos2, List<(int h, int id)>> StackCuboids(List<(Pos p1, Pos p2, int id)> cuboids)
+        static Dictionary<Pos, List<(int h, int id)>> StackCuboids(List<(Pos3 p1, Pos3 p2, int id)> cuboids, int skipId = -1)
         {
-            Dictionary<Pos2, List<(int h, int id)>> stack = new();
-            var allPos = cuboids.Select(w => new List<Pos>() { w.p1, w.p2 }).SelectMany(w => w).ToList();
-            int xmin = allPos.Select(w => w.x).Min();
-            int xmax = allPos.Select(w => w.x).Max();
-            int ymin = allPos.Select(w => w.y).Min();
-            int ymax = allPos.Select(w => w.y).Max();
-            for (int y = ymin; y <= ymax; y++)
-                for (int x = xmin; x <= xmax; x++)
-                    stack[new Pos2(x, y)] = new() { (0, -1) };
-            foreach ((Pos p1, Pos p2, int id) in cuboids)
+            Dictionary<Pos, List<(int h, int id)>> stack = new();
+            var allPos = cuboids.Select(w => new List<Pos3>() { w.p1, w.p2 }).SelectMany(w => w).ToList();
+            (int x1, int x2) = allPos.Select(w => w.x).MinMax();
+            (int y1, int y2) = allPos.Select(w => w.y).MinMax();
+            for (int y = y1; y <= y2; y++)
+                for (int x = x1; x <= x2; x++)
+                    stack[new Pos(x, y)] = new() { (0, -1) };
+            foreach ((Pos3 p1, Pos3 p2, int id) in cuboids)
             {
-                int x1 = Math.Min(p1.x, p2.x);
-                int x2 = Math.Max(p1.x, p2.x);
-                int y1 = Math.Min(p1.y, p2.y);
-                int y2 = Math.Max(p1.y, p2.y);
+                if (id == skipId)
+                    continue;
                 int hBase = int.MinValue;
-                for (int y = y1; y <= y2; y++)
-                    for (int x = x1; x <= x2; x++)
-                        hBase = Math.Max(hBase, stack[new Pos2(x, y)].Last().h);
-                int z1 = Math.Min(p1.z, p2.z);
-                int z2 = Math.Max(p1.z, p2.z);
-                for (int z = z1; z <= z2; z++)
-                    for (int y = y1; y <= y2; y++)
-                        for (int x = x1; x <= x2; x++)
-                        {
-                            int h = hBase + 1 + (z - z1);
-                            stack[new Pos2(x, y)].Add((h, id));
-                        }
+                for (int y = p1.y; y <= p2.y; y++)
+                    for (int x = p1.x; x <= p2.x; x++)
+                        hBase = Math.Max(hBase, stack[new Pos(x, y)].Last().h);
+                for (int z = p1.z; z <= p2.z; z++)
+                    for (int y = p1.y; y <= p2.y; y++)
+                        for (int x = p1.x; x <= p2.x; x++)
+                            stack[new Pos(x, y)].Add((hBase + 1 + (z - p1.z), id));
             }
             return stack;
         }
-        static bool StacksEqual(Dictionary<Pos2, List<(int h, int id)>> sFull, Dictionary<Pos2, List<(int h, int id)>> sCmp, int ignoreId)
+        static int MovedCuboidsCount(Dictionary<Pos, List<(int h, int id)>> sFull, Dictionary<Pos, List<(int h, int id)>> sCmp, int ignoreId)
         {
+            HashSet<int> idsMoved = new();
             foreach (var (pos, pile) in sFull)
             {
-                var pile1 = pile.Where(w => w.id != ignoreId).ToList();
-                if (!pile1.SequenceEqual(sCmp[pos]))
-                    return false;
+                var pileCmp = sCmp[pos].ToDictionary(w => w.h, w => w.id);
+                foreach (var (h, id) in pile)
+                    if ((id != ignoreId) && (!pileCmp.ContainsKey(h) || pileCmp[h] != id))
+                        idsMoved.Add(id);
             }
-            return true;
-        }
-        static void PrintStackX(Dictionary<Pos2, List<(int h, int id)>> stack)
-        {
-            List<string> strs = new();
-            int hMax = stack.Values.Select(w => w.Last().h).Max();
-            int amin = stack.Keys.Select(w => w.x).Min();
-            int amax = stack.Keys.Select(w => w.x).Max();
-            for (int h = hMax; h >= 0; h--)
-            {
-                string s = "";
-                for (int a = amin; a <= amax; a++)
-                {
-                    var piles = stack.Where(w => w.Key.x == a);
-                    var hPiles = piles.Where(w => w.Value.Select(v => v.h).Contains(h));
-                    var ids = hPiles.Select(w => w.Value.Where(v => v.h == h).First()).Select(w => w.id).Distinct().ToList();
-                    char c = ' ';
-                    if (ids.Any())
-                    {
-                        int v1 = ids.First();
-                        c = ids.Count == 1 ? (v1 == -1 ? '-' : (char)('A' + v1)) : '?';
-                    }
-                    s += c;
-                }
-                s += $" {h}";
-                Console.WriteLine(s);
-            }
-            Console.WriteLine();
-        }
-        static void PrintStackY(Dictionary<Pos2, List<(int h, int id)>> stack)
-        {
-            List<string> strs = new();
-            int hMax = stack.Values.Select(w => w.Last().h).Max();
-            int amin = stack.Keys.Select(w => w.y).Min();
-            int amax = stack.Keys.Select(w => w.y).Max();
-            for (int h = hMax; h >= 0; h--)
-            {
-                string s = "";
-                for (int a = amin; a <= amax; a++)
-                {
-                    var piles = stack.Where(w => w.Key.y == a);
-                    var hPiles = piles.Where(w => w.Value.Select(v => v.h).Contains(h));
-                    var ids = hPiles.Select(w => w.Value.Where(v => v.h == h).First()).Select(w => w.id).Distinct().ToList();
-                    char c = ' ';
-                    if (ids.Any())
-                    {
-                        int v1 = ids.First();
-                        c = ids.Count == 1 ? (v1 == -1 ? '-' : (char)('A' + v1 % 26)) : '?';
-                    }
-                    s += c;
-                }
-                s += $" {h}";
-                Console.WriteLine(s);
-            }
-            Console.WriteLine();
-        }
-        public static Object PartA(string file)
-        {
-            var input = ReadInput.Strings(Day, file);
-            List<(Pos p1, Pos p2, int id)> cuboids = new();
-            foreach (var (s, idx) in input.Select((s, i) => (s, i)))
-            {
-                var i = Extract.Ints(s);
-                cuboids.Add((new Pos(i[0], i[1], i[2]), new Pos(i[3], i[4], i[5]), idx));
-            }
-            cuboids = cuboids.OrderBy(w => w.p1.z).ToList();
-            //Console.WriteLine($"Read {cuboids.Count} cuboids.");
-            var fullStack = StackCuboids(cuboids);
-            //PrintStackX(fullStack);
-            //PrintStackY(fullStack);
-            int a = 0;
-            foreach (var c in cuboids)
-            {
-                var stack = StackCuboids(cuboids.Where(w => w.id != c.id).ToList());
-                //Console.WriteLine();
-                //Console.WriteLine($"Id: {c.id}");
-                //Console.WriteLine();
-                //PrintStackX(fullStack);
-                //PrintStackX(stack);
-                //Console.WriteLine();
-                if (StacksEqual(fullStack, stack, c.id))
-                    a++;
-            }
-            return a;
-        }
-        public static Object PartB(string file)
-        {
-            var v = ReadInput.Strings(Day, file);
-            return 0;
+            return idsMoved.Count;
         }
         public static (Object a, Object b) DoPuzzle(string file)
         {
-            return (PartA(file), PartB(file));
+            var input = ReadInput.Strings(Day, file);
+            List<(Pos3 p1, Pos3 p2, int id)> cuboids = new();
+            foreach (var (s, idx) in input.Select((s, i) => (s, i)))
+            {
+                var i = Extract.Ints(s);
+                cuboids.Add((new Pos3(i[0], i[1], i[2]), new Pos3(i[3], i[4], i[5]), idx));
+            }
+            cuboids = cuboids.OrderBy(w => w.p1.z).ToList();
+            var fullStack = StackCuboids(cuboids);
+            int a = 0, b = 0;
+            foreach (var c in cuboids)
+            {
+                int n = MovedCuboidsCount(fullStack, StackCuboids(cuboids, c.id), c.id);
+                b += n;
+                if (n == 0)
+                    a++;
+            }
+            return (a, b);
         }
         static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
