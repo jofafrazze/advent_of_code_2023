@@ -88,13 +88,24 @@ namespace aoc
             }
             while (!done);
         }
+        static int GetMaxPossibleLength(Dictionary<Pos, int> maxSteps, PosId posId)
+        {
+            int sum = 0;
+            foreach (var (k, v) in maxSteps)
+                if (!posId.visited.Contains(k))
+                    sum += v;
+            return posId.steps + sum * 5 / 7;
+        }
         static int WalkSteps(Dictionary<Pos, Dictionary<Pos, int>> steps, Pos start, Pos end)
         {
-            Queue<PosId> toVisit = new(new[] { new PosId(start, 0, new HashSet<Pos>()) });
+            var maxStepsDict = steps.ToDictionary(w => w.Key, w => w.Value.Values.Max());
+            PosId startId = new PosId(start, 0, new HashSet<Pos>());
+            var toVisit = new PriorityQueue<PosId, int>();
+            toVisit.Enqueue(startId, -GetMaxPossibleLength(maxStepsDict, startId));
+            //Queue<PosId> toVisit = new(new[] { startId });
             int maxSteps = 0;
-            while (toVisit.Any())
+            while (toVisit.TryDequeue(out PosId cur, out int maxPossibleLengthNegative))
             {
-                PosId cur = toVisit.Dequeue();
                 if (cur.visited.Contains(cur.p))
                     continue;
                 cur.visited.Add(cur.p);
@@ -108,7 +119,13 @@ namespace aoc
                     continue;
                 }
                 foreach (var (p, cost) in steps[cur.p])
-                    toVisit.Enqueue(new PosId(p, cur.steps + cost, cur.visited.ToHashSet()));
+                {
+                    int maxPossibleLength = -maxPossibleLengthNegative;
+                    PosId nextId = new PosId(p, cur.steps + cost, cur.visited.ToHashSet());
+                    int newMaxPossibleLength = GetMaxPossibleLength(maxStepsDict, nextId);
+                    if (maxSteps == 0 || newMaxPossibleLength > maxSteps)
+                        toVisit.Enqueue(nextId, -newMaxPossibleLength);
+                }
             }
             return maxSteps;
         }
@@ -124,7 +141,7 @@ namespace aoc
             int b = WalkSteps(steps, start, end);
             return (a, b);
         }
-        static void Main() => Aoc.Execute(Day, DoPuzzle, true);
+        static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }
