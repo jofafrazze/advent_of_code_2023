@@ -174,9 +174,9 @@ namespace test
     public class TestDay24
     {
         [Fact]
-        public static void Example() => Assert.Equal((0, 0), aoc.Day24.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((2, 47L), aoc.Day24.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((0, 0), aoc.Day24.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((21679, 566914635762564), aoc.Day24.DoPuzzle(Input.actual));
     }
     public class TestDay25
     {

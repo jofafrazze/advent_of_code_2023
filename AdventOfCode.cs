@@ -117,6 +117,7 @@ namespace AdventOfCode
         {
             return new GenericPosition2D<T>(y, x);
         }
+        public override string ToString() => $"[{x}, {y}]";
         // Rotates pos n steps clock-wize around center
         public static GenericPosition2D<T> Rotate4Steps(GenericPosition2D<T> pos, int n, GenericPosition2D<T> center = new())
         {
@@ -262,6 +263,7 @@ namespace AdventOfCode
                 Extensions.Abs(Extensions.Subtract(z, p.z!))
                 );
         }
+        public override string ToString() => $"[{x}, {y}, {z}]";
     }
 
     public struct IntRange : IComparable<IntRange> 
