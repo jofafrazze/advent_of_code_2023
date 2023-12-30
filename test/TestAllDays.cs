@@ -132,9 +132,9 @@ namespace test
     public class TestDay18
     {
         [Fact]
-        public static void Example() => Assert.Equal((62, 952408144115L), aoc.Day18.DoPuzzle(Input.example));
+        public static void Example() => Assert.Equal((62L, 952408144115L), aoc.Day18.DoPuzzle(Input.example));
         [Fact]
-        public static void Test() => Assert.Equal((47527, -1), aoc.Day18.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((47527L, 52240187443190L), aoc.Day18.DoPuzzle(Input.actual));
     }
     public class TestDay19
     {
@@ -155,7 +155,7 @@ namespace test
         [Fact]
         public static void Example() => Assert.Equal(0, 0); // No example input works for both parts
         [Fact]
-        public static void Test() => Assert.Equal((3637, -1), aoc.Day21.DoPuzzle(Input.actual));
+        public static void Test() => Assert.Equal((3637, 601113643448699), aoc.Day21.DoPuzzle(Input.actual));
     }
     public class TestDay22
     {

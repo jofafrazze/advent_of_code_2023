@@ -6,76 +6,54 @@ namespace aoc
 {
     public class Day18
     {
-        // Today: 
-        static readonly Dictionary<char, Pos> directions = new()
+        // Lavaduct Lagoon: Calculate area of huge pool
+        static readonly Dictionary<char, Pos> directionsA = new()
         {
             ['U'] = CoordsRC.up,
             ['L'] = CoordsRC.left,
             ['D'] = CoordsRC.down,
             ['R'] = CoordsRC.right,
         };
-        public static Object PartA(string file)
+        static Pos[] directionsB = new[] { CoordsRC.right, CoordsRC.down, CoordsRC.left, CoordsRC.up };
+        static List<Pos> BuildPolygon(List<(Pos dir, int len)> recipe)
         {
-            var input = ReadInput.StringLists(Day, file);
-            Pos cur = new Pos();
-            HashSet<Pos> been = new() { cur };
-            foreach (var sl in input)
-            {
-                Pos dir = directions[sl[0][0]];
-                for (int i = 0; i < int.Parse(sl[1]); i++)
-                {
-                    cur += dir;
-                    been.Add(cur);
-                }
-            }
-            int xmin = been.Select(w => w.x).Min();
-            int xmax = been.Select(w => w.x).Max();
-            int ymin = been.Select(w => w.y).Min();
-            int ymax = been.Select(w => w.y).Max();
-            int w = xmax - xmin + 1;
-            int h = ymax - ymin + 1;
-            Map m = new(w + 2, h + 2, '.');
-            foreach(var p in been)
-                m.data[p.x - xmin + 1, p.y - ymin + 1] = '#';
-            m.Print();
-            Console.WriteLine($"Map is w = {w}, h = {h}, thus area = {w * h}.");
-            Queue<Pos> toFill = new();
-            HashSet<Pos> visited = new();
-            toFill.Enqueue(new Pos());
-            int it = 0;
-            while (toFill.Any())
-            {
-                it++;
-                Pos p = toFill.Dequeue();
-                if (visited.Contains(p))
-                    continue;
-                visited.Add(p);
-                m[p] = '*';
-                foreach (var d in CoordsRC.directions4)
-                {
-                    Pos p2 = p + d;
-                    if (m.HasPosition(p2) && m[p2] == '.' && !visited.Contains(p2))
-                        toFill.Enqueue(p2);
-                }
-                if (it % 100 == 0)
-                {
-                    Console.WriteLine($"Queue has {toFill.Count} positions left to try.");
-                    //m.Print();
-                }
-            }
-            m.Print();
-            return m.Positions().Where(w => m[w] != '*').Count();
+            Pos pos = new();
+            List<Pos> polygon = new() { pos };
+            foreach (var (dir, len) in recipe)
+                polygon.Add(pos += dir * len);
+            return polygon;
         }
-        public static Object PartB(string file)
+        static long PolygonArea(List<Pos> polygon)
         {
-            var v = ReadInput.Strings(Day, file);
-            return 0;
+            // Shoelace formula
+            long sum1 = 0, sum2 = 0;
+            for (int i = 0; i < polygon.Count; i++)
+            {
+                sum1 += polygon[i].x * (long)polygon[(i + 1) % polygon.Count].y;
+                sum2 += polygon[i].y * (long)polygon[(i + 1) % polygon.Count].x;
+            }
+            long area = Math.Abs(sum1 - sum2) / 2;
+            long circumference = 0;
+            for (int i = 0; i < polygon.Count; i++)
+                circumference += polygon[i].ManhattanDistance(polygon[(i + 1) % polygon.Count]);
+            // Total area is area + half circumference + 4 * 1/4 corners
+            return area + circumference / 2 + 1;
         }
         public static (Object a, Object b) DoPuzzle(string file)
         {
-            return (PartA(file), PartB(file));
+            var input = ReadInput.StringLists(Day, file);
+            List<(Pos, int)> recipeA = new();
+            List<(Pos, int)> recipeB = new();
+            foreach (var sl in input)
+            {
+                recipeA.Add((directionsA[sl[0][0]], int.Parse(sl[1])));
+                recipeB.Add((directionsB[sl[2][^2] - '0'], Convert.ToInt32(sl[2][2..^2], 16)));
+            }
+            long a = PolygonArea(BuildPolygon(recipeA));
+            long b = PolygonArea(BuildPolygon(recipeB));
+            return (a, b);
         }
-        static void Main() => Aoc.Execute(Day, DoPuzzle);
+        static void Main() => Aoc.Execute(Day, DoPuzzle, true);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
     }
 }
