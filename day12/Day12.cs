@@ -6,77 +6,63 @@ namespace aoc
     public class Day12
     {
         // Hot Springs: Evil impossible pattern matching (brute force won't cut it)
-        public static Object PartA(string file)
+        static Dictionary<string, long> cache = new();
+        static long GetArrangements(string pattern, List<int> groups)
         {
-            var input = ReadInput.StringLists(Day, file);
-            int sum = 0;
-            foreach (var item in input)
-            {
-                int possibleMatches = 0;
-                var broken = item[1].Split(",").Select(int.Parse);
-                uint maxVal = (uint)Math.Pow(2, item[0].Length) - 1;
-                uint onePattern = 0;
-                uint mustOnePattern = 0;
-                string s = String.Concat(item[0].Reverse());
-                for (int i = 0; i < s.Length; i++)
-                {
-                    if (s[i] != '.')
-                        onePattern |= 1u << i;
-                    if (s[i] == '#')
-                        mustOnePattern |= 1u << i;
-                }
-                uint zeroPattern = ~onePattern;
-                //Console.WriteLine(Convert.ToString(onePattern, 2).PadLeft(32, '_'));
-                //Console.WriteLine(Convert.ToString(zeroPattern, 2).PadLeft(32, '_'));
-                //Console.WriteLine();
-                var brokenReversed = broken.Reverse().ToList();
-                for (uint i = 0; i <= maxVal; i++)
-                {
-                    if ((i & zeroPattern) == 0 && (i & mustOnePattern) == mustOnePattern)
-                    {
-                        var nums = new List<int>();
-                        int nOnes = 0;
-                        int nWhenLastGroupAdded = 0;
-                        uint testPattern = i;
-                        for (int n = 0; n < 32; n++)
-                        {
-                            if (((1 << n) & testPattern) != 0)
-                            {
-                                nOnes++;
-                            }
-                            else if (nOnes > 0)
-                            {
-                                nums.Add(nOnes);
-                                nOnes = 0;
-                                nWhenLastGroupAdded = n;
-                            }
-                        }
-                        if (nums.SequenceEqual(brokenReversed))
-                        {
-                            //Console.WriteLine(testPattern.ToString("X"));
-                            string b0 = Convert.ToString(testPattern, 2);
-                            string b = b0.PadLeft(item[0].Length, '_');
-                            //Console.WriteLine(item[0]);
-                            //Console.WriteLine(b);
-                            //Console.WriteLine();
-                            possibleMatches++;
-                        }
-                    }
-                }
-                //Console.WriteLine(possibleMatches);
-                //Console.WriteLine();
-                sum += possibleMatches;
-            }
-            return sum;
+            string key = pattern + string.Join(',', groups);
+            if (!cache.ContainsKey(key))
+                cache[key] = ComputeArrangements(pattern, groups);
+            return cache[key];
         }
-        public static Object PartB(string file)
+        static long ComputeArrangements(string pattern, List<int> groups)
         {
-            var v = ReadInput.Strings(Day, file);
-            return -1;
+            while (true)
+            {
+                if (groups.Count == 0)
+                    return pattern.Contains('#') ? 0 : 1;
+                if (string.IsNullOrEmpty(pattern))
+                    return 0;
+                if (pattern.StartsWith('?'))
+                    return GetArrangements("." + pattern[1..], groups) + GetArrangements("#" + pattern[1..], groups);
+                if (pattern.StartsWith('.'))
+                {
+                    pattern = pattern.TrimStart('.');
+                    continue;
+                }
+                if (pattern.StartsWith('#'))
+                {
+                    if (groups.Count == 0 || pattern.Length < groups[0] || pattern[..groups[0]].Contains('.'))
+                        return 0;
+                    if (groups.Count > 1)
+                    {
+                        if (pattern.Length < groups[0] + 1 || pattern[groups[0]] == '#')
+                            return 0;
+                        pattern = pattern[(groups[0] + 1)..];
+                        groups = groups.Skip(1).ToList();
+                        continue;
+                    }
+                    pattern = pattern[groups[0]..];
+                    groups = groups.Skip(1).ToList();
+                    continue;
+                }
+                throw new Exception("Bad pattern");
+            }
         }
         public static (Object a, Object b) DoPuzzle(string file)
         {
-            return (PartA(file), PartB(file));
+            var input = ReadInput.StringLists(Day, file);
+            long a = 0, b = 0;
+            foreach (var sl in input)
+            {
+                var pattern = sl[0];
+                var groups = sl[1].Split(',').Select(int.Parse).ToList();
+                a += GetArrangements(pattern, groups);
+                pattern = string.Join('?', Enumerable.Repeat(pattern, 5));
+                var groups5Str = string.Join(',', Enumerable.Repeat(sl[1], 5));
+                groups = groups5Str.Split(',').Select(int.Parse).ToList();
+                b += GetArrangements(pattern, groups);
+            }
+            return (a, b);
         }
         static void Main() => Aoc.Execute(Day, DoPuzzle);
         static string Day => Aoc.Day(MethodBase.GetCurrentMethod()!);
